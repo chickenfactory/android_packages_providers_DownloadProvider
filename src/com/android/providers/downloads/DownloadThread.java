@@ -805,6 +805,8 @@ public class DownloadThread implements Runnable {
         if (resuming) {
             if (mInfoDelta.mETag != null) {
                 conn.addRequestProperty("If-Match", mInfoDelta.mETag);
+            }
+            conn.addRequestProperty("Range", "bytes=" + mInfoDelta.mCurrentBytes + "-");
         }
         if (state.mContinuingDownload) {
             if (state.mHeaderETag != null) {
@@ -812,7 +814,7 @@ public class DownloadThread implements Runnable {
                     conn.addRequestProperty("If-Match", state.mHeaderETag);
                 }
             }
-            conn.addRequestProperty("Range", "bytes=" + mInfoDelta.mCurrentBytes + "-");
+            conn.addRequestProperty("Range", "bytes=" + state.mCurrentBytes + "-");
         }
     }
 
