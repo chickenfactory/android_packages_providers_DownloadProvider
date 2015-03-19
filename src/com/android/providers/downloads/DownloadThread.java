@@ -104,6 +104,7 @@ public class DownloadThread implements Runnable {
 
     private final long mId;
     private volatile boolean mPolicyDirty;
+    private final StorageManager mStorageManager;
 
     // Add for carrier feature - download breakpoint continuing.
     // Support continuing download after the download is broken
@@ -126,8 +127,6 @@ public class DownloadThread implements Runnable {
      */
     private final DownloadInfo mInfo;
     private final DownloadInfoDelta mInfoDelta;
-
-    private volatile boolean mPolicyDirty;
 
     /**
      * Local changes to {@link DownloadInfo}. These are kept local to avoid
@@ -747,10 +746,10 @@ public class DownloadThread implements Runnable {
             mInfoDelta.mMimeType = Intent.normalizeMimeType(conn.getContentType());
         }
 
-       state.mHeaderETag = conn.getHeaderField("ETag");
+       mInfoDelta.mHeaderETag = conn.getHeaderField("ETag");
 
-        if (state.mHeaderETag == null) {
-            state.mHeaderETag = QRD_ETAG;
+        if (mInfoDelta.mHeaderETag == null) {
+            mInfoDelta.mHeaderETag = QRD_ETAG;
         }
 
         final String transferEncoding = conn.getHeaderField("Transfer-Encoding");
@@ -808,13 +807,13 @@ public class DownloadThread implements Runnable {
             }
             conn.addRequestProperty("Range", "bytes=" + mInfoDelta.mCurrentBytes + "-");
         }
-        if (state.mContinuingDownload) {
-            if (state.mHeaderETag != null) {
-                if (!state.mHeaderETag.equals(QRD_ETAG)) {
-                    conn.addRequestProperty("If-Match", state.mHeaderETag);
+        if (mInfoDelta.mContinuingDownload) {
+            if (mInfoDelta.mHeaderETag != null) {
+                if (!mInfoDelta.mHeaderETag.equals(QRD_ETAG)) {
+                    conn.addRequestProperty("If-Match", mInfoDelta.mHeaderETag);
                 }
             }
-            conn.addRequestProperty("Range", "bytes=" + state.mCurrentBytes + "-");
+            conn.addRequestProperty("Range", "bytes=" + mInfoDelta.mCurrentBytes + "-");
         }
     }
 
